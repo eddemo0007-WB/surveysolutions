@@ -142,3 +142,8 @@ artifacts
 appsettings.*.ini
 !/installer/src/**/appsettings.*.ini
 appsettings.*.json
+/src/.veracode/veracode-tmp/binary
+/src/Services/.veracode/veracode-tmp/binary
+/src/Services/.veracode/build
+/src/.veracode/build
+/src/Services/.veracode/custom/WB.Services.Export.Host
