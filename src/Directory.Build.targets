@@ -1,30 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Target Name="MoveApkFile" Condition="$(ApkOutputPath) != '' AND $(ApkFileSigned) != ''">
-    <Move SourceFiles="$(MSBuildProjectDirectory)\$(ApkFileSigned)" DestinationFiles="$(ApkOutputPath)" OverwriteReadOnlyFiles="True" />
-  </Target>
-
-  <Target Name="PrepareManifest" BeforeTargets="BeforeBuild" Condition="'$(VersionCode)' != '' and '$(ApplicationManifest)' != ''">
-    <PropertyGroup>
-      <VersionFile>$([MSBuild]::GetPathOfFileAbove('.version', '$(MSBuildThisFileDirectory)/'))</VersionFile>
-    </PropertyGroup>
-
-    <ReadLinesFromFile File="$(VersionFile)">
-      <Output TaskParameter="Lines" PropertyName="VersionNumber" />
-    </ReadLinesFromFile>
-
-    <PropertyGroup Condition="$(VersionName) == ''">
-      <VersionName Condition="'$(ExcludeExtensions)' == 'True'">$(VersionNumber) (build $(VersionCode))</VersionName>
-      <VersionName Condition="'$(ExcludeExtensions)' != 'True'">$(VersionNumber) (build $(VersionCode)) with Maps</VersionName>
-    </PropertyGroup>
-
-    <PropertyGroup>
-      <_AndroidNS>
-        <Namespace Prefix="android" Uri="http://schemas.android.com/apk/res/android" />
-      </_AndroidNS>
-    </PropertyGroup>
-
-    <XmlPoke XmlInputPath="$(ApplicationManifest)" Query="manifest/@android:versionCode" Value="$(VersionCode)" Namespaces="$(_AndroidNS)" />
-    <XmlPoke XmlInputPath="$(ApplicationManifest)" Query="manifest/@android:versionName" Value="$(VersionName)" Namespaces="$(_AndroidNS)" />
-  </Target>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<Import Project="Veracode.props" />	
+	<Target Name="VeracodeCopyOutput" Condition=" '$(VeracodeBuild)' == 'true'" AfterTargets="Build">
+		<ItemGroup>
+			<BinFiles Include="$(OutputPath)/**/*.dll;$(OutputPath)/**/*.exe;$(OutputPath)/**/*.pdb" />
+			<!-- <BinFiles Remove="$(OutputPath)/**/Microsoft.*" /> -->
+			<!-- <BinFiles Remove="$(OutputPath)/**/System.*" /> -->
+		</ItemGroup>
+		<ItemGroup Condition=" '$(VeracodeRemoveExecutables)' == 'true'">
+			<BinFiles Remove="$(OutputPath)/**/$(MSBuildProjectName).exe" />			
+		</ItemGroup>
+		<Copy SourceFiles="@(BinFiles)" DestinationFiles="@(BinFiles->'$(VeracodeProjectPath)/%(RecursiveDir)%(Filename)%(Extension)')" />		
+	</Target>
 </Project>
